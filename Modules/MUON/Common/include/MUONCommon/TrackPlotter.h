@@ -17,8 +17,10 @@
 
 #include "ReconstructionDataFormats/GlobalTrackID.h"
 #include <DataFormatsGlobalTracking/RecoContainer.h>
+#include "MFTTracking/Constants.h"
 
 #include <TH1F.h>
+#include <TH2F.h>
 #include <TProfile.h>
 
 #include <fmt/core.h>
@@ -49,11 +51,13 @@ namespace o2::quality_control_modules::muon
 class TrackPlotter : public HistPlotter
 {
  public:
+  static constexpr Double_t sLastMFTPlaneZ = o2::mft::constants::mft::LayerZCoordinate()[9];
+
   TrackPlotter(int maxTracksPerTF, GID::Source source, std::string path);
   ~TrackPlotter() = default;
 
- public:
   void fillHistograms(const o2::globaltracking::RecoContainer& recoCont);
+  void setFirstTForbit(int orbit) { mFirstTForbit = orbit; }
 
  private:
   /** create histograms related to tracks */
@@ -78,6 +82,8 @@ class TrackPlotter : public HistPlotter
   GID::Source mSrc;
   std::string mPath;
 
+  uint32_t mFirstTForbit{0};
+
   std::unique_ptr<TH1F> mTrackBC;                         ///< BC associated to the track
   std::unique_ptr<TH1F> mTrackBCWidth;                    ///< BC width associated to the track
   std::unique_ptr<TH1> mTrackDT;                          ///< time difference between MFT/MCH/MID tracks segments
@@ -89,8 +95,28 @@ class TrackPlotter : public HistPlotter
   std::array<std::unique_ptr<TH1F>, 3> mTrackPhi;         ///< phi (in degrees) of the track
   std::array<std::unique_ptr<TH1F>, 3> mTrackPt;          ///< Pt (Gev/c^2) of the track
   std::array<std::unique_ptr<TH1F>, 3> mTrackRAbs;        ///< R at absorber end of the track
+  std::array<std::unique_ptr<TH2F>, 6> mTrackPos;                     ///< track poisiton at MFT exit
+  std::array<std::unique_ptr<TH2F>, 2> mTrackPosAtMFT;                     ///< track poisiton at MFT exit
+  std::unique_ptr<TH2F> mTrackPosMID;                     ///< track poisiton at MID entrance
 
-  std::unique_ptr<TH1F> mMinv; ///< invariant mass of unlike-sign track pairs
+  std::unique_ptr<TH1F> mMatchScoreMFTMCH;
+  std::unique_ptr<TH1F> mMatchChi2MFTMCH;
+  std::unique_ptr<TH1F> mMatchChi2MCHMID;
+  std::unique_ptr<TH1F> mMatchNMFTCandidates;
+
+  std::unique_ptr<TH1F> mTrackDxMFT;
+  std::unique_ptr<TH1F> mTrackDyMFT;
+  std::unique_ptr<TH1F> mTrackSxMFT;
+  std::unique_ptr<TH1F> mTrackSyMFT;
+
+  std::unique_ptr<TH1F> mTrackDxMID;
+  std::unique_ptr<TH1F> mTrackDyMID;
+  std::unique_ptr<TH1F> mTrackSxMID;
+  std::unique_ptr<TH1F> mTrackSyMID;
+
+  std::unique_ptr<TH1F> mMinv;     ///< invariant mass of unlike-sign track pairs
+  std::unique_ptr<TH1F> mMinvBgd;  ///< invariant mass background of unlike-sign, out-of-time track pairs
+  std::unique_ptr<TH1F> mDimuonDT; ///< time difference between MFT/MCH/MID tracks segments
 };
 
 template <typename T>
