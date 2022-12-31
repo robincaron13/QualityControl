@@ -20,6 +20,7 @@
 #include <DetectorsBase/GeometryManager.h>
 #include <Framework/DataRefUtils.h>
 #include <Framework/InputRecord.h>
+#include <Framework/TimingInfo.h>
 #include <MCHGeometryTransformer/Transformations.h>
 #include <ReconstructionDataFormats/TrackMCHMID.h>
 #include <ReconstructionDataFormats/GlobalFwdTrack.h>
@@ -144,9 +145,8 @@ void TracksTask::monitorData(o2::framework::ProcessingContext& ctx)
 {
   ILOG(Info, Devel) << "Debug: MonitorData" << ENDM;
 
-  mRecoCont.collectData(ctx, *mDataRequest.get());
-
-  ILOG(Info, Devel) << "Debug: Collected data" << ENDM;
+  int firstTForbit = ctx.services().get<o2::framework::TimingInfo>().firstTForbit;
+  ILOG(Info, Devel) << "Debug: firstTForbit=" << firstTForbit << ENDM;
 
   if (!assertInputs(ctx)) {
     return;
@@ -154,10 +154,15 @@ void TracksTask::monitorData(o2::framework::ProcessingContext& ctx)
 
   ILOG(Info, Devel) << "Debug: Asserted inputs" << ENDM;
 
-  auto tracks = mRecoCont.getMCHTracks();
-  auto rofs = mRecoCont.getMCHTracksROFRecords();
-  auto clusters = mRecoCont.getMCHTrackClusters();
-  auto digits = ctx.inputs().get<gsl::span<o2::mch::Digit>>("mchtrackdigits");
+  mRecoCont.collectData(ctx, *mDataRequest.get());
+
+  ILOG(Info, Devel) << "Debug: Collected data" << ENDM;
+
+  for (auto& p : mTrackPlotters) {
+    if (p.second) {
+      p.second->setFirstTForbit(firstTForbit);
+    }
+  }
 
   if (mSrc[GID::MCH] == 1) {
     ILOG(Info, Devel) << "Debug: MCH requested" << ENDM;

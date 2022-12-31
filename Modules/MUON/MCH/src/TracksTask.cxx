@@ -102,7 +102,7 @@ void TracksTask::createTrackHistos()
   mTrackEta = createHisto<TH1F>("TrackEta", "Track #eta;#eta", 200, -4.5, -2);
   mTrackPhi = createHisto<TH1F>("TrackPhi", "Track #phi;#phi (deg)", 360, 0, 360);
   mTrackRAbs = createHisto<TH1F>("TrackRAbs", "Track R_{abs};R_{abs} (cm)", 1000, 0, 100);
-  mTrackBC = createHisto<TH1F>("TrackBC", "Track BC;BC", o2::constants::lhc::LHCMaxBunches, 0, o2::constants::lhc::LHCMaxBunches - 1);
+  mTrackBC = createHisto<TH1F>("TrackBC", "Track BC;BC", o2::constants::lhc::LHCMaxBunches, 0, o2::constants::lhc::LHCMaxBunches, true);
   mTrackChi2OverNDF = createHisto<TH1F>("TrackChi2OverNDF", "Track #chi^{2}/ndf;#chi^{2}/ndf", 500, 0, 50);
 }
 
