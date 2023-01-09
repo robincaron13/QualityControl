@@ -492,7 +492,14 @@ bool MuonTrack::extrapToZMID(o2::mch::TrackParam& trackParam, float z) const {
 
 bool MuonTrack::canBeMuon() const
 {
-  return (mRAbs > 25 && mRAbs < 80 && std::abs(getXMid()) > 50 && std::abs(getXMid()) < 250 && std::abs(getYMid()) > 50 && std::abs(getYMid()) < 300);
+  bool inABS = (mRAbs > 17.6) && (mRAbs < 89.5);
+  bool inHoleMID = (std::abs(getXMid()) < 50) && (std::abs(getYMid()) < 50);
+  bool outOfMID = (std::abs(getXMid()) > 250) || (std::abs(getYMid()) > 300);
+  bool inMID = (!inHoleMID) && (!outOfMID);
+  //return (inABS);
+  return (inABS && inMID);
+  //return true;
+  //return (mRAbs > 17.6 && mRAbs < 89.5 && std::abs(getXMid()) > 50 && std::abs(getXMid()) < 250 && std::abs(getYMid()) > 50 && std::abs(getYMid()) < 300);
 }
 
 

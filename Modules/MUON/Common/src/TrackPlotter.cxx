@@ -184,6 +184,9 @@ void TrackPlotter::fillTrackPairHistos(gsl::span<const MuonTrack> tracks)
 bool TrackPlotter::fillTrackHistos(const MuonTrack& track)
 {
   int q = (track.getSign() < 0) ? 1 : 0;
+  if (!track.canBeMuon()) {
+    return false;
+  }
 
   // only consider
 
