@@ -113,7 +113,7 @@ void TracksTask::createTrackPairHistos()
 
 void TracksTask::initialize(o2::framework::InitContext& /*ic*/)
 {
-  ILOG(Debug, Devel) << "initialize TracksTask" << ENDM; // QcInfoLogger is used. FairMQ logs will go to there as well.
+  ILOG(Info, Support) << "initialize TracksTask" << ENDM; // QcInfoLogger is used. FairMQ logs will go to there as well.
 
   createTrackHistos();
   createClusterHistos();
