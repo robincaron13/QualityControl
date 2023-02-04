@@ -95,24 +95,16 @@ class TrackPlotter : public HistPlotter
   std::array<std::unique_ptr<TH1F>, 3> mTrackPhi;         ///< phi (in degrees) of the track
   std::array<std::unique_ptr<TH1F>, 3> mTrackPt;          ///< Pt (Gev/c^2) of the track
   std::array<std::unique_ptr<TH1F>, 3> mTrackRAbs;        ///< R at absorber end of the track
-  std::array<std::unique_ptr<TH2F>, 6> mTrackPos;                     ///< track poisiton at MFT exit
-  std::array<std::unique_ptr<TH2F>, 2> mTrackPosAtMFT;                     ///< track poisiton at MFT exit
-  std::unique_ptr<TH2F> mTrackPosMID;                     ///< track poisiton at MID entrance
+  std::array<std::unique_ptr<TH2F>, 2> mTrackPosAtMFT;    ///< track poisiton at MFT exit
 
   std::unique_ptr<TH1F> mMatchScoreMFTMCH;
   std::unique_ptr<TH1F> mMatchChi2MFTMCH;
-  std::unique_ptr<TH1F> mMatchChi2MCHMID;
   std::unique_ptr<TH1F> mMatchNMFTCandidates;
 
   std::unique_ptr<TH1F> mTrackDxMFT;
   std::unique_ptr<TH1F> mTrackDyMFT;
   std::unique_ptr<TH1F> mTrackSxMFT;
   std::unique_ptr<TH1F> mTrackSyMFT;
-
-  std::unique_ptr<TH1F> mTrackDxMID;
-  std::unique_ptr<TH1F> mTrackDyMID;
-  std::unique_ptr<TH1F> mTrackSxMID;
-  std::unique_ptr<TH1F> mTrackSyMID;
 
   std::unique_ptr<TH1F> mMinv;     ///< invariant mass of unlike-sign track pairs
   std::unique_ptr<TH1F> mMinvBgd;  ///< invariant mass background of unlike-sign, out-of-time track pairs

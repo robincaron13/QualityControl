@@ -87,13 +87,8 @@ void TrackPlotter::createTrackHistos(int maxTracksPerTF)
 
   mMatchScoreMFTMCH = createHisto<TH1F>(TString::Format("%sMatchScoreMFTMCH", mPath.c_str()), "Match Score MFT-MCH;score", 1000, 0, 100, true);
   mMatchChi2MFTMCH = createHisto<TH1F>(TString::Format("%sMatchChi2MFTMCH", mPath.c_str()), "Match #chi^{2} MFT-MCH;#chi^{2}", 1000, 0, 100, true);
-  mMatchChi2MCHMID = createHisto<TH1F>(TString::Format("%sMatchChi2MCHMID", mPath.c_str()), "Match #chi^{2} MCH-MID;#chi^{2}", 1000, 0, 100, true);
   mMatchNMFTCandidates = createHisto<TH1F>(TString::Format("%sMatchNMFTCandidates", mPath.c_str()), "MFT Candidates;candidates", 1000, 0, 1000, true);
 
-  //if (mSrc == GID::MFTMCHMID) {
-  //  mTrackDT = std::make_unique<TH2F>(TString::Format("%sTrackDT", mPath.c_str()), "Track Time Correlation (MID-MCH vs MFT-MCH);ns;ns", 500, -500, 500, 500, -10000, 10000);
-  //  histograms().emplace_back(HistInfo{ mTrackDT.get(), "col", "logz" });
-  //} else {
     std::string titleStr;
     float range = 800;
     if (mSrc == GID::MCHMID) {
@@ -110,33 +105,16 @@ void TrackPlotter::createTrackHistos(int maxTracksPerTF)
                                       TString::Format("Track Time Correlation %s;bc", titleStr.c_str()),
                                       1600, -range, range);
     histograms().emplace_back(HistInfo{ mTrackDT.get(), "hist", "logy" });
-  //}
-
-  int zEnd[6] = {500, 400, 300, 200, 100, 70};
-  for (int i = 0; i < 6; i++) {
-    std::cout << "zEnd[" << i << "] = " << zEnd[i] << std::endl;
-    mTrackPos[i] = std::make_unique<TH2F>(TString::Format("%sTrackPosZ%d", mPath.c_str(), zEnd[i]),
-        TString::Format("Track position at Z=%d;X (cm);Y (cm)", zEnd[i]), 80, -200, 200, 80, -200, 200);
-      histograms().emplace_back(HistInfo{ mTrackPos[i].get(), "col", "" });
-  }
 
   mTrackPosAtMFT[0] = std::make_unique<TH2F>(TString::Format("%sTrackPosAtMFT_MFTtrack", mPath.c_str()), "Track position at MFT exit (MFT track);X (cm);Y (cm)", 80, -200, 200, 80, -200, 200);
   histograms().emplace_back(HistInfo{ mTrackPosAtMFT[0].get(), "col", "" });
   mTrackPosAtMFT[1] = std::make_unique<TH2F>(TString::Format("%sTrackPosAtMFT_MCHtrack", mPath.c_str()), "Track position at MFT exit (MCH track);X (cm);Y (cm)", 80, -200, 200, 80, -200, 200);
   histograms().emplace_back(HistInfo{ mTrackPosAtMFT[1].get(), "col", "" });
 
-  mTrackPosMID = std::make_unique<TH2F>(TString::Format("%sTrackPosMID", mPath.c_str()), "Track position at MID entrance;X (cm);Y (cm)", 80, -400, 400, 80, -400, 400);
-  histograms().emplace_back(HistInfo{ mTrackPosMID.get(), "col", "" });
-
   mTrackDxMFT = createHisto<TH1F>(TString::Format("%sTrackDxMFT", mPath.c_str()), "Track Dx;cm", 200, -100, 100);
   mTrackDyMFT = createHisto<TH1F>(TString::Format("%sTrackDyMFT", mPath.c_str()), "Track Dy;cm", 200, -100, 100);
   mTrackSxMFT = createHisto<TH1F>(TString::Format("%sTrackSxMFT", mPath.c_str()), "Track Sx;", 400, -2, 2);
   mTrackSyMFT = createHisto<TH1F>(TString::Format("%sTrackSyMFT", mPath.c_str()), "Track Sy;", 400, -2, 2);
-
-  mTrackDxMID = createHisto<TH1F>(TString::Format("%sTrackDxMID", mPath.c_str()), "Track Dx;cm", 200, -100, 100);
-  mTrackDyMID = createHisto<TH1F>(TString::Format("%sTrackDyMID", mPath.c_str()), "Track Dy;cm", 200, -100, 100);
-  mTrackSxMID = createHisto<TH1F>(TString::Format("%sTrackSxMID", mPath.c_str()), "Track Sx;", 400, -2, 2);
-  mTrackSyMID = createHisto<TH1F>(TString::Format("%sTrackSyMID", mPath.c_str()), "Track Sy;", 400, -2, 2);
 }
 
 void TrackPlotter::createTrackPairHistos()
@@ -197,40 +175,11 @@ bool TrackPlotter::fillTrackHistos(const MuonTrack& track)
     case GID::MCHMID: {
       auto dtBC = track.getIRMID().toLong() - track.getIRMCH().toLong();
       auto dtMUS = track.getTimeMID().getTimeStamp() - track.getTimeMCH().getTimeStamp();
-      /*std::cout << fmt::format("MCH: TF={}  IR={},{}  BC={}  MUS={}",
-          mFirstTForbit, track.getIRMCH().orbit, track.getIRMCH().bc,
-          (track.getIRMCH().orbit-mFirstTForbit)*3564 + track.getIRMCH().bc,
-          track.getTimeMCH().getTimeStamp()) << std::endl;
-      std::cout << fmt::format("MID: TF={}  IR={},{}  BC={}  MUS={}",
-          mFirstTForbit, track.getIRMID().orbit, track.getIRMID().bc,
-          (track.getIRMID().orbit-mFirstTForbit)*3564 + track.getIRMID().bc,
-          track.getTimeMID().getTimeStamp()) << std::endl;
-      std::cout << "dtBC=" << dtBC << "  dtMUS=" << dtMUS << std::endl;*/
       mTrackDT->Fill(dtBC);
       //mTrackDT->Fill(dtMUS * 1000);
-      mMatchChi2MCHMID->Fill(track.getMatchInfoFwd().getMIDMatchingChi2());
       break;
     }
     case GID::MFTMCH: {
-      /*auto bcDiffMFT = track.getIRMFT().differenceInBC(InteractionRecord{0, mFirstTForbit});
-      auto bcDiffMCH = track.getIRMCH().differenceInBC(InteractionRecord{0, mFirstTForbit});
-      auto timeMFT = track.getTimeMFT().getTimeStamp();
-      auto timeMCH = track.getTimeMCH().getTimeStamp();
-      auto timeDiffMFT = timeMFT - (0.5 + bcDiffMFT) * o2::constants::lhc::LHCBunchSpacingMUS;
-      auto timeDiffMCH = timeMCH - (0.5 + bcDiffMCH) * o2::constants::lhc::LHCBunchSpacingMUS;
-      if (std::abs(timeDiffMFT) >= 0) {
-        std::cout << fmt::format("MFT: TF={}  IR={},{}  BC={}  MUS={}  DIIF={}",
-                  mFirstTForbit, track.getIRMFT().orbit, track.getIRMFT().bc,
-                  (track.getIRMFT().orbit-mFirstTForbit)*3564 + track.getIRMFT().bc,
-                  track.getTimeMFT().getTimeStamp(), timeDiffMFT) << std::endl;
-      }
-      if (std::abs(timeDiffMCH) > 1) {
-        std::cout << fmt::format("MCH: TF={}  IR={},{}  BC={}  MUS={}",
-                  mFirstTForbit, track.getIRMCH().orbit, track.getIRMCH().bc,
-                  (track.getIRMCH().orbit-mFirstTForbit)*3564 + track.getIRMCH().bc,
-                  track.getTimeMCH().getTimeStamp()) << std::endl;
-      }*/
-
       auto dtBC = track.getIRMFT().toLong() - track.getIRMCH().toLong();
       auto dtMUS = track.getTimeMFT().getTimeStamp() - track.getTimeMCH().getTimeStamp();
       mTrackDT->Fill(dtBC);
@@ -242,18 +191,11 @@ bool TrackPlotter::fillTrackHistos(const MuonTrack& track)
     }
     case GID::MFTMCHMID: {
       auto dtBC1 = track.getIRMFT().toLong() - track.getIR().toLong();
-      auto dtBC2 = track.getIRMID().toLong() - track.getIRMCH().toLong();
       auto dtMUS1 = track.getTimeMFT().getTimeStamp() - track.getTimeMCH().getTimeStamp();
-      auto dtMUS2 = track.getTimeMID().getTimeStamp() - track.getTimeMCH().getTimeStamp();
-      //auto* htemp = dynamic_cast<TH2F*>(mTrackDT.get());
-      //if (htemp) {
-      //  htemp->Fill(dtMUS1 * 1000, dtMUS2 * 1000);
-      //}
       mTrackDT->Fill(dtBC1);
       //mTrackDT->Fill(dtMUS1 * 1000);
       mMatchScoreMFTMCH->Fill(track.getMatchInfoFwd().getMFTMCHMatchingScore());
       mMatchChi2MFTMCH->Fill(track.getMatchInfoFwd().getMFTMCHMatchingChi2());
-      mMatchChi2MCHMID->Fill(track.getMatchInfoFwd().getMIDMatchingChi2());
       mMatchNMFTCandidates->Fill(track.getMatchInfoFwd().getNMFTCandidates());
       break;
     }
@@ -282,23 +224,16 @@ bool TrackPlotter::fillTrackHistos(const MuonTrack& track)
   mTrackRAbs[q]->Fill(rAbs);
   mTrackRAbs[2]->Fill(rAbs);
 
-  float zEnd[6] = {-500, -400, -300, -200, -100, -70};
-  for (int i = 0; i < 6; i++) {
-    o2::mch::TrackParam trackParam;
-    track.extrapToZMCH(trackParam, zEnd[i]);
-    mTrackPos[i]->Fill(trackParam.getNonBendingCoor(), trackParam.getBendingCoor());
-  }
-
-  o2::mch::TrackParam trackParamAtMFT;
   float zMFT = sLastMFTPlaneZ;
-  //float zMFT = o2::quality_control_modules::muon::MuonTrack::sAbsZEnd;
-  //float zMFT = -100;
+  o2::mch::TrackParam trackParamAtMFT;
+
   track.extrapToZMFT(trackParamAtMFT, zMFT);
   double xMFT = trackParamAtMFT.getNonBendingCoor();
   double yMFT = trackParamAtMFT.getBendingCoor();
   double sxMFT = TMath::ATan(trackParamAtMFT.px() / TMath::Abs(trackParamAtMFT.pz()));
   double syMFT = TMath::ATan(trackParamAtMFT.py() / TMath::Abs(trackParamAtMFT.pz()));
   mTrackPosAtMFT[0]->Fill(trackParamAtMFT.getNonBendingCoor(), trackParamAtMFT.getBendingCoor());
+
   track.extrapToZMCH(trackParamAtMFT, zMFT);
   double xMCH = trackParamAtMFT.getNonBendingCoor();
   double yMCH = trackParamAtMFT.getBendingCoor();
@@ -306,23 +241,10 @@ bool TrackPlotter::fillTrackHistos(const MuonTrack& track)
   double syMCH = TMath::ATan(trackParamAtMFT.py() / TMath::Abs(trackParamAtMFT.pz()));
   mTrackPosAtMFT[1]->Fill(trackParamAtMFT.getNonBendingCoor(), trackParamAtMFT.getBendingCoor());
 
-  //mTrackDxMFT->Fill(xMCH - xMFT);
-  //mTrackDyMFT->Fill(yMCH - yMFT);
-  //mTrackSxMFT->Fill(sxMCH - sxMFT);
-  //mTrackSyMFT->Fill(syMCH - syMFT);
-
-  mTrackPosMID->Fill(track.getXMid(), track.getYMid());
-  if (track.getTrackMID()) {
-    auto dx = track.getXMid() - track.getTrackMID()->getPositionX();
-    auto dy = track.getYMid() - track.getTrackMID()->getPositionY();
-    mTrackDxMID->Fill(dx);
-    mTrackDyMID->Fill(dy);
-
-    auto sx = track.getTrackMCH()->getParameters()[1] - track.getTrackMID()->getDirectionX();
-    auto sy = track.getTrackMCH()->getParameters()[3] - track.getTrackMID()->getDirectionY();
-    mTrackSxMID->Fill(sx);
-    mTrackSyMID->Fill(sy);
-  }
+  mTrackDxMFT->Fill(xMCH - xMFT);
+  mTrackDyMFT->Fill(yMCH - yMFT);
+  mTrackSxMFT->Fill(sxMCH - sxMFT);
+  mTrackSyMFT->Fill(syMCH - syMFT);
 
   return true;
 }
@@ -371,58 +293,7 @@ void TrackPlotter::fillHistograms(const o2::globaltracking::RecoContainer& recoC
 
   decltype(muonTracks.size()) nok{ 0 };
 
-
-  auto MFTTracks = recoCont.getMFTTracks();
-  auto MFTTrackROFRec = recoCont.getMFTTracksROFRecords();
-  int nROFs = MFTTrackROFRec.size();
-
-  LOG(info) << "Loaded " << MFTTracks.size() << " MFT Tracks in " << nROFs << " ROFs";
-
   for (const auto& mt : muonTracks) {
-    if (mSrc == GID::MCHMID) {
-      o2::mch::TrackParam trackParamAtMFT;
-      float zMFT = sLastMFTPlaneZ;
-
-      mt.extrapToZMCH(trackParamAtMFT, zMFT);
-      double xMCH = trackParamAtMFT.getNonBendingCoor();
-      double yMCH = trackParamAtMFT.getBendingCoor();
-      double sxMCH = TMath::ATan(trackParamAtMFT.px() / TMath::Abs(trackParamAtMFT.pz()));
-      double syMCH = TMath::ATan(trackParamAtMFT.py() / TMath::Abs(trackParamAtMFT.pz()));
-
-      auto trackIR = mt.getIR();
-
-      for (int irof = 0; irof < nROFs; irof++) {
-        const auto& rofRec = MFTTrackROFRec[irof];
-
-        auto nBC = rofRec.getBCData().toLong() - trackIR.toLong();
-        //if (nBC < -600 || nBC > 15) {
-        if (nBC < -600 || nBC > 600) {
-          continue;
-        }
-
-        int trlim = rofRec.getFirstEntry() + rofRec.getNEntries();
-        for (int it = rofRec.getFirstEntry(); it < trlim; it++) {
-          const auto& trcOrig = MFTTracks[it];
-          // working copy of outer track param
-          o2::mft::TrackMFT trc;
-          trc.setParameters(trcOrig.getOutParam().getParameters());
-          trc.setZ(trcOrig.getOutParam().getZ());
-          trc.setCovariances(trcOrig.getOutParam().getCovariances());
-          trc.setTrackChi2(trcOrig.getOutParam().getTrackChi2());
-          trc.propagateToZ(zMFT, 0.5f);
-
-          double xMFT = trc.getX();
-          double yMFT = trc.getY();
-          double sxMFT = TMath::ATan(trc.getPx() / TMath::Abs(trc.getPz()));
-          double syMFT = TMath::ATan(trc.getPy() / TMath::Abs(trc.getPz()));
-
-          mTrackDxMFT->Fill(xMCH - xMFT);
-          mTrackDyMFT->Fill(yMCH - yMFT);
-          mTrackSxMFT->Fill(sxMCH - sxMFT);
-          mTrackSyMFT->Fill(syMCH - syMFT);
-        }
-      }
-    }
     bool ok = fillTrackHistos(mt);
     if (ok) {
       ++nok;
