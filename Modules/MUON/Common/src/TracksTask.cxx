@@ -13,10 +13,6 @@
 
 #include "MUONCommon/Helpers.h"
 #include "QualityControl/ObjectsManager.h"
-#include <DataFormatsMCH/Cluster.h>
-#include <DataFormatsMCH/Digit.h>
-#include <DataFormatsMCH/ROFRecord.h>
-#include <DataFormatsMCH/TrackMCH.h>
 #include <Framework/DataRefUtils.h>
 #include <Framework/InputRecord.h>
 #include <Framework/TimingInfo.h>
@@ -123,10 +119,6 @@ bool TracksTask::assertInputs(o2::framework::ProcessingContext& ctx)
   }
   if (!ctx.inputs().isValid("trackMCHTRACKCLUSTERS")) {
     ILOG(Info, Support) << "no mch track clusters available on input" << ENDM;
-    return false;
-  }
-  if (!ctx.inputs().isValid("mchtrackdigits")) {
-    ILOG(Info, Support) << "no mch track digits available on input" << ENDM;
     return false;
   }
   if (mSrc[GID::Source::MCHMID] == 1) {
